@@ -55,7 +55,6 @@
             -webkit-appearance: none;
             appearance: none;
             font-size: 16px;
-            /* Prevents zoom on iOS */
             font-family: 'Montserrat', sans-serif;
         }
 
@@ -64,29 +63,78 @@
             appearance: none;
             font-family: 'Montserrat', sans-serif;
         }
+
+        /* Logout button in nav */
+        .nav-logout-form {
+            margin: 0;
+        }
+
+        .btn-nav-logout {
+            padding: 7px 16px;
+            background: rgba(255, 255, 255, .15);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, .3);
+            border-radius: 7px;
+            font-size: .78rem;
+            font-weight: 700;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+            cursor: pointer;
+            font-family: 'Montserrat', sans-serif;
+            transition: background .15s;
+        }
+
+        .btn-nav-logout:hover {
+            background: rgba(255, 255, 255, .25);
+        }
     </style>
 </head>
 
 <body>
     <div class="min-h-screen flex flex-col">
+
         <!-- Navigation Bar -->
         <nav class="bg-white border-b-4 border-red-600 sticky top-0 z-40 shadow-sm">
             <div class="w-full px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
+
                 <a href="{{ route('projects.index') }}"
                     class="flex items-center gap-2 sm:gap-3 flex-shrink-0 hover:opacity-80 transition-opacity">
                     <img src="{{ asset('images/logo.jpg') }}" alt="ARDC Logo"
                         class="h-10 sm:h-12 w-auto object-contain">
-                    <div class="flex flex-col hidden sm:block">
+                    <div class="hidden sm:flex flex-col">
                         <span class="text-sm font-black text-slate-900">ARDC</span>
                         <p class="text-xs text-red-600 font-bold leading-tight">Budget Tracking</p>
                     </div>
                 </a>
+
+                @auth
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <span style="font-size:.8rem; color:#888; font-weight:600;">{{ Auth::user()->name }}</span>
+                        
+                        <a href="{{ route('settings.projects.index') }}" class="btn-nav-logout" style="background: rgba(99, 102, 241, 0.15); border-color: rgba(99, 102, 241, 0.3); color: #4f46e5; text-decoration: none;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline; vertical-align:middle; margin-right:4px; margin-top:-2px;">
+                                <circle cx="12" cy="12" r="3"></circle>
+                                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                            </svg>
+                            Settings
+                        </a>
+
+                        <form method="POST" action="{{ route('logout') }}" class="nav-logout-form">
+                            @csrf
+                            <button type="submit" class="btn-nav-logout" style="background:#BE0000; border-color:#BE0000;">
+                                Logout
+                            </button>
+                        </form>
+                    </div>
+                @endauth
+
             </div>
         </nav>
 
         <!-- Main Content -->
         <div class="flex-1 w-full px-4 sm:px-6 py-6 sm:py-12">
             <div class="max-w-7xl mx-auto">
+
                 @if (session('success'))
                     <div
                         class="mb-6 sm:mb-8 p-4 px-4 sm:px-6 bg-gradient-to-r from-red-50 to-red-100 border-2 border-red-600 text-red-700 rounded-xl flex items-center gap-3 animate-fade-in">
@@ -145,7 +193,6 @@
             animation: fade-in 0.3s ease-out;
         }
 
-        /* Mobile optimizations */
         @media (max-width: 640px) {
             body {
                 overflow-x: hidden;
