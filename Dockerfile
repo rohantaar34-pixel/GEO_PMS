@@ -13,6 +13,8 @@ RUN apt-get update \
         zip \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j"$(nproc)" gd mbstring pdo_mysql pdo_pgsql zip \
+    && a2dismod mpm_event mpm_worker || true \
+    && a2enmod mpm_prefork \
     && a2enmod rewrite \
     && rm -rf /var/lib/apt/lists/*
 
