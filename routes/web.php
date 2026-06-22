@@ -8,6 +8,8 @@ use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\MonitoringController;
 use App\Http\Controllers\ProjectReportController;
+use App\Http\Controllers\InventoryController;
+use App\Http\Controllers\InventoryReportController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -66,9 +68,19 @@ Route::middleware(['auth'])->group(function () {
     // ==================== PROJECT MONITORING ====================
     Route::get('/monitoring', [MonitoringController::class, 'index'])->name('monitoring.index');
 
+    // ==================== INVENTORY ====================
+    Route::get('inventory/report/excel', [InventoryReportController::class, 'exportExcel'])->name('inventory.report.excel');
+    Route::get('inventory/report/pdf', [InventoryReportController::class, 'exportPdf'])->name('inventory.report.pdf');
+    Route::get('inventory/report/word', [InventoryReportController::class, 'exportWord'])->name('inventory.report.word');
+    Route::resource('inventory', InventoryController::class)->except(['show', 'create']);
+    Route::get('inventory/{inventory}/assign',  [InventoryController::class, 'assign'])->name('inventory.assign');
+    Route::post('inventory/{inventory}/assign', [InventoryController::class, 'doAssign'])->name('inventory.doAssign');
+    Route::get('inventory/{inventory}/assignments', [InventoryController::class, 'assignments'])->name('inventory.assignments');
+
     // ==================== SETTINGS ====================
     Route::prefix('settings')->name('settings.')->group(function () {
         Route::resource('projects', App\Http\Controllers\Settings\ProjectController::class)->except(['show']);
+        Route::resource('users', App\Http\Controllers\Settings\UserController::class)->except(['show', 'create', 'edit']);
     });
 });
 

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\InventoryAssignment;
 
 class Project extends Model
 {
@@ -12,6 +13,11 @@ class Project extends Model
     public function transactions(): HasMany
     {
         return $this->hasMany(Transaction::class);
+    }
+
+    public function inventoryAssignments(): HasMany
+    {
+        return $this->hasMany(InventoryAssignment::class);
     }
     
     public function budgetAdditions(): HasMany

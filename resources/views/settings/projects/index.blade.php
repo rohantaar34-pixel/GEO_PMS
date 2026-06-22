@@ -14,6 +14,29 @@
         align-items: center;
         margin-bottom: 24px;
     }
+    .settings-tabs {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+    }
+    .settings-tab {
+        display: inline-flex;
+        align-items: center;
+        padding: 9px 14px;
+        border-radius: 8px;
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        color: #374151;
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 700;
+    }
+    .settings-tab.active {
+        background: #4f46e5;
+        color: #fff;
+        border-color: #4f46e5;
+    }
     .page-title {
         font-size: 24px;
         font-weight: 700;
@@ -165,6 +188,11 @@
         </svg>
         Dashboard
     </a>
+
+    <div class="settings-tabs">
+        <a href="{{ route('settings.projects.index') }}" class="settings-tab active">Projects</a>
+        <a href="{{ route('settings.users.index') }}" class="settings-tab">Users</a>
+    </div>
 
     <div class="header-flex">
         <h1 class="page-title">Project Settings</h1>
