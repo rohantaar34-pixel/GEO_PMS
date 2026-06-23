@@ -46,6 +46,11 @@ COPY docker/entrypoint.sh /usr/local/bin/railway-entrypoint
 RUN sed -i 's/\r$//' /usr/local/bin/railway-entrypoint \
     && chmod +x /usr/local/bin/railway-entrypoint
 
+# Force correct MPM after all files are copied
+RUN a2dismod mpm_event mpm_worker mpm_prefork || true \
+    && a2enmod mpm_prefork \
+    && a2enmod rewrite
+
 EXPOSE 8080
 
 ENTRYPOINT ["railway-entrypoint"]
