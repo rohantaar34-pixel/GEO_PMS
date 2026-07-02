@@ -21,6 +21,11 @@ class Project extends Model
         return $this->hasMany(InventoryAssignment::class);
     }
 
+    public function materialRequests(): HasMany
+    {
+        return $this->hasMany(MaterialRequest::class);
+    }
+
     public function assignedUsers(): BelongsToMany
     {
         return $this->belongsToMany(User::class)->withTimestamps();
@@ -50,10 +55,20 @@ class Project extends Model
     {
         return $this->expenses()->sum('amount');
     }
+
+    public function getReservedProcurementAttribute(): float
+    {
+        return (float) $this->materialRequests()
+            ->where('budget_commitment_status', MaterialRequest::COMMITMENT_RESERVED)
+            ->sum('estimated_total_cost');
+    }
     
     public function getCurrentBudgetAttribute(): float
     {
-        return $this->budget + $this->total_budget_additions - $this->total_expense;
+        return $this->budget
+            + $this->total_budget_additions
+            - $this->total_expense
+            - $this->reserved_procurement;
     }
     
     public function getBalanceAttribute(): float
@@ -65,7 +80,7 @@ class Project extends Model
     {
         $totalBudget = $this->budget + $this->total_budget_additions;
         if ($totalBudget <= 0) return 0;
-        return round(($this->total_expense / $totalBudget) * 100, 2);
+        return round((($this->total_expense + $this->reserved_procurement) / $totalBudget) * 100, 2);
     }
 
     public function recalculateCompletion(): void

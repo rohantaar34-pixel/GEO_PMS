@@ -35,9 +35,15 @@
     .field-in { width: 100%; padding: 11px 14px; font-size: 14px; border: 1px solid #e5e7eb; border-radius: var(--radius-sm); background: #fafafa; color: var(--ink); outline: none; transition: border-color .15s; font-family: 'Montserrat', sans-serif; }
     .field-in:focus { border-color: var(--inv); background: #fff; }
     select.field-in { cursor: pointer; }
+    .expense-options { display: grid; gap: 8px; border: 0; padding: 0; margin: 0; }
+    .expense-option { display: grid; grid-template-columns: 20px 1fr; gap: 10px; align-items: start; min-height: 52px; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: var(--radius-sm); background: #fff; cursor: pointer; }
+    .expense-option:has(input:checked) { border-color: var(--inv); background: var(--inv-light); }
+    .expense-option input { width: 18px; height: 18px; margin: 2px 0 0; accent-color: var(--inv); }
+    .expense-option strong { display: block; color: var(--ink); font-size: 13px; margin-bottom: 2px; }
+    .expense-option span { display: block; color: var(--ink-3); font-size: 12px; line-height: 1.45; }
 
     /* Live preview */
-    .preview-box { background: linear-gradient(135deg, #ecfeff 0%, #cffafe 100%); border: 1px solid #a5f3fc; border-radius: var(--radius-sm); padding: 16px 18px; margin: 16px 0; display: none; }
+    .preview-box { background: #ecfeff; border: 1px solid #a5f3fc; border-radius: var(--radius-sm); padding: 16px 18px; margin: 16px 0; display: none; }
     .preview-box.show { display: block; }
     .preview-row { display: flex; justify-content: space-between; align-items: center; font-size: 13px; padding: 4px 0; }
     .preview-row:not(:last-child) { border-bottom: 1px solid #a5f3fc; }
@@ -87,11 +93,33 @@
 
         <div class="warn-box">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="flex-shrink:0;margin-top:1px;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-            <span>The total cost will be <strong>automatically deducted</strong> from the selected project's budget as an expense transaction.</span>
+            <span id="assignmentEffect">Choose whether this assignment should affect the project budget.</span>
         </div>
 
         <form method="POST" action="{{ route('inventory.doAssign', $inventory) }}" id="assignForm">
             @csrf
+
+            <div class="field-group">
+                <fieldset class="expense-options">
+                    <legend class="field-lbl">Record as Project Expense? *</legend>
+                    <label class="expense-option">
+                        <input type="radio" name="charge_to_project" value="1" required
+                            @checked(old('charge_to_project') === '1') onchange="updatePreview()">
+                        <span>
+                            <strong>Yes, charge the project</strong>
+                            <span>Create a ledger expense and reduce the selected project's available budget.</span>
+                        </span>
+                    </label>
+                    <label class="expense-option">
+                        <input type="radio" name="charge_to_project" value="0" required
+                            @checked(old('charge_to_project') === '0') onchange="updatePreview()">
+                        <span>
+                            <strong>No, assign stock only</strong>
+                            <span>Deduct inventory stock without changing the project budget or expense ledger.</span>
+                        </span>
+                    </label>
+                </fieldset>
+            </div>
 
             <div class="field-group">
                 <label class="field-lbl" for="project_id">Target Project *</label>
@@ -125,8 +153,8 @@
 
             {{-- Live Preview --}}
             <div class="preview-box" id="previewBox">
-                <div class="preview-title">📊 Cost Preview</div>
-                <div class="preview-row">
+                <div class="preview-title" id="previewTitle">Assignment Preview</div>
+                <div class="preview-row" id="unitCostRow">
                     <span class="preview-lbl">Unit Cost</span>
                     <span class="preview-val">₱{{ number_format($inventory->unit_cost, 2) }} / {{ $inventory->unit }}</span>
                 </div>
@@ -143,14 +171,14 @@
                     <span class="preview-val" id="prev-balance">—</span>
                 </div>
                 <div class="preview-row" style="border-top:2px solid #a5f3fc;margin-top:6px;padding-top:8px;">
-                    <span class="preview-lbl" style="font-weight:700;">Total Deduction</span>
+                    <span class="preview-lbl" id="totalLabel" style="font-weight:700;">Budget Deduction</span>
                     <span class="preview-deduct" id="prev-total">₱0.00</span>
                 </div>
             </div>
 
-            <button type="submit" class="btn-assign-submit" id="submitBtn">
+            <button type="submit" class="btn-assign-submit" id="submitBtn" disabled>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
-                Assign to Project & Deduct Budget
+                <span id="submitLabel">Choose Assignment Type</span>
             </button>
         </form>
     </div>
@@ -170,10 +198,24 @@ function updatePreview() {
     const opt = sel.options[sel.selectedIndex];
     const box = document.getElementById('previewBox');
     const btn = document.getElementById('submitBtn');
+    const expenseChoice = document.querySelector('input[name="charge_to_project"]:checked');
+    const isExpense = expenseChoice?.value === '1';
+    const hasChoice = Boolean(expenseChoice);
+    const isValid = qty > 0 && qty <= maxQty && Boolean(sel.value) && hasChoice;
 
-    if (qty > 0 && sel.value) {
+    document.getElementById('assignmentEffect').textContent = !hasChoice
+        ? 'Choose whether this assignment should affect the project budget.'
+        : (isExpense
+            ? 'This assignment will create an expense and reduce the selected project budget.'
+            : 'This assignment will only deduct inventory stock. Project budget and expenses will stay unchanged.');
+    document.getElementById('submitLabel').textContent = !hasChoice
+        ? 'Choose Assignment Type'
+        : (isExpense ? 'Assign and Record Expense' : 'Assign Without Expense');
+    btn.disabled = !isValid;
+
+    if (isValid) {
         const balance   = parseFloat(opt.dataset.balance) || 0;
-        const total     = qty * unitCost;
+        const total     = isExpense ? qty * unitCost : 0;
         const newStock  = maxQty - qty;
         const newBal    = balance - total;
 
@@ -182,12 +224,16 @@ function updatePreview() {
         document.getElementById('prev-balance').textContent = fmt(newBal) + (newBal < 0 ? ' ⚠️ Deficit!' : '');
         document.getElementById('prev-total').textContent   = fmt(total);
         document.getElementById('prev-balance').style.color = newBal < 0 ? '#dc2626' : '#059669';
+        document.getElementById('unitCostRow').style.display = isExpense ? 'flex' : 'none';
+        document.getElementById('previewTitle').textContent = isExpense ? 'Expense Assignment Preview' : 'Stock-Only Assignment Preview';
+        document.getElementById('prev-total').style.color = isExpense ? '#dc2626' : '#059669';
 
         box.classList.add('show');
-        btn.disabled = (qty > maxQty);
     } else {
         box.classList.remove('show');
     }
 }
+
+updatePreview();
 </script>
 @endsection

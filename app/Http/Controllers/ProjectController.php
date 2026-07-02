@@ -6,6 +6,7 @@ use App\Models\Project;
 use App\Models\Transaction;
 use App\Models\ExpenseCategory;
 use App\Models\Document;
+use App\Models\MaterialRequest;
 use App\Services\TransactionReportService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -35,9 +36,17 @@ class ProjectController extends Controller
                 'total_budget' => $projects->sum('budget'),
                 'total_budget_additions' => Transaction::where('type', 'budget_addition')->sum('amount'),
                 'total_expense'  => Transaction::where('type', 'expense')->sum('amount'),
+                'total_reserved_procurement' => MaterialRequest::where(
+                    'budget_commitment_status',
+                    MaterialRequest::COMMITMENT_RESERVED
+                )->sum('estimated_total_cost'),
                 'total_balance'  => $projects->sum('budget') 
                                   + Transaction::where('type', 'budget_addition')->sum('amount')
-                                  - Transaction::where('type', 'expense')->sum('amount'),
+                                  - Transaction::where('type', 'expense')->sum('amount')
+                                  - MaterialRequest::where(
+                                      'budget_commitment_status',
+                                      MaterialRequest::COMMITMENT_RESERVED
+                                  )->sum('estimated_total_cost'),
             ];
 
             return view('projects.index', compact('projects', 'summary'));

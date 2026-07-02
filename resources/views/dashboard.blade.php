@@ -153,6 +153,7 @@
             <!-- Choice Cards -->
             <div class="cards-grid">
 
+                @if(Auth::user()->isAdmin())
                 <!-- Ledger Card -->
                 <a href="{{ route('projects.index') }}" class="choice-card">
                     <div class="card-icon ledger-icon">
@@ -170,7 +171,9 @@
                         <svg class="arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6" /></svg>
                     </div>
                 </a>
+                @endif
 
+                @if(Auth::user()->canManageOperations())
                 <!-- Document Tracker Card -->
                 <a href="{{ route('documents.index') }}" class="choice-card">
                     <div class="card-icon document-icon">
@@ -188,9 +191,10 @@
                         <svg class="arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6" /></svg>
                     </div>
                 </a>
+                @endif
 
                 <!-- Project Monitoring Card -->
-                <a href="{{ Auth::user()->isAdmin() ? route('monitoring.index') : route('monitoring.submit') }}" class="choice-card">
+                <a href="{{ Auth::user()->canManageOperations() ? route('monitoring.index') : route('monitoring.submit') }}" class="choice-card">
                     <div class="card-icon project-icon">
                         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
@@ -199,13 +203,33 @@
                         </svg>
                     </div>
                     <h2 class="card-title">Project Monitoring</h2>
-                    <p class="card-description">{{ Auth::user()->isAdmin() ? 'Review reports, approve progress, and monitor completion metrics.' : 'Submit accomplishments, upload photos, and review your approval status.' }}</p>
+                    <p class="card-description">{{ Auth::user()->canManageOperations() ? 'Review reports, approve progress, and monitor completion metrics.' : 'Submit accomplishments, upload photos, and review your approval status.' }}</p>
                     <div class="card-footer">
                         <span class="project-text">Monitor Projects</span>
                         <svg class="arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6" /></svg>
                     </div>
                 </a>
 
+                @if(Auth::user()->isEmployee())
+                <!-- Material Request Card -->
+                <a href="{{ route('material-requests.create') }}" class="choice-card">
+                    <div class="card-icon inventory-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" />
+                            <path d="M3.3 7 12 12l8.7-5" />
+                            <path d="M12 22V12" />
+                        </svg>
+                    </div>
+                    <h2 class="card-title">Material Requests</h2>
+                    <p class="card-description">Request materials for assigned projects and track approval status.</p>
+                    <div class="card-footer">
+                        <span class="inventory-text">Request Materials</span>
+                        <svg class="arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6" /></svg>
+                    </div>
+                </a>
+                @endif
+
+                @if(Auth::user()->canManageOperations())
                 <!-- Project Inventory Card -->
                 <a href="{{ route('inventory.index') }}" class="choice-card">
                     <div class="card-icon inventory-icon">
@@ -222,6 +246,25 @@
                         <svg class="arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6" /></svg>
                     </div>
                 </a>
+                @endif
+
+                @if(Auth::user()->canManageOperations())
+                <!-- Material Request Review Card -->
+                <a href="{{ route('material-requests.index') }}" class="choice-card">
+                    <div class="card-icon inventory-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 11l3 3L22 4" />
+                            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+                        </svg>
+                    </div>
+                    <h2 class="card-title">Material Approvals</h2>
+                    <p class="card-description">Review requests, check stock, issue available materials, or mark procurement needs.</p>
+                    <div class="card-footer">
+                        <span class="inventory-text">Review Requests</span>
+                        <svg class="arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6" /></svg>
+                    </div>
+                </a>
+                @endif
 
                 @if(Auth::user()->isAdmin())
                 <!-- Settings Card -->
@@ -271,10 +314,12 @@
                     <div class="stat-number">{{ $stats['total_documents'] ?? 0 }}</div>
                     <div class="stat-label">Documents</div>
                 </div>
-                <div class="stat-item">
-                    <div class="stat-number">₱{{ number_format($stats['total_budget'] ?? 0, 0) }}</div>
-                    <div class="stat-label">Total Initial Budget</div>
-                </div>
+                @if(Auth::user()->isAdmin())
+                    <div class="stat-item">
+                        <div class="stat-number">₱{{ number_format($stats['total_budget'] ?? 0, 0) }}</div>
+                        <div class="stat-label">Total Initial Budget</div>
+                    </div>
+                @endif
             </div>
 
             <!-- Project Budgets Section -->

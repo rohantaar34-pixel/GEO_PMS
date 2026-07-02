@@ -28,9 +28,15 @@ class ProjectReportController extends Controller
             ->map(fn($g) => $g->sum('amount'))
             ->sortByDesc(fn($v) => $v);
 
-        $currentBudget = $project->budget + $budgetAdditions->sum('amount') - $expenses->sum('amount');
+        $reservedProcurement = $project->reserved_procurement;
+        $currentBudget = $project->budget
+            + $budgetAdditions->sum('amount')
+            - $expenses->sum('amount')
+            - $reservedProcurement;
         $totalBudget = $project->budget + $budgetAdditions->sum('amount');
-        $budgetUtilization = $totalBudget > 0 ? round(($expenses->sum('amount') / $totalBudget) * 100, 1) : 0;
+        $budgetUtilization = $totalBudget > 0
+            ? round((($expenses->sum('amount') + $reservedProcurement) / $totalBudget) * 100, 1)
+            : 0;
 
         return compact(
             'project',
@@ -38,6 +44,7 @@ class ProjectReportController extends Controller
             'budgetAdditions',
             'expenses',
             'categorySummary',
+            'reservedProcurement',
             'currentBudget',
             'totalBudget',
             'budgetUtilization'

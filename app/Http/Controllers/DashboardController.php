@@ -24,13 +24,15 @@ class DashboardController extends Controller
 
         // Get statistics for the dashboard
         $stats = [
-            'total_projects' => (clone $projectQuery)->count(),
-            'total_documents' => $user->isAdmin() ? Document::count() : 0,
+            'total_projects' => $user->canManageOperations() ? Project::count() : (clone $projectQuery)->count(),
+            'total_documents' => $user->canManageOperations() ? Document::count() : 0,
             'total_budget' => (clone $projectQuery)->sum('budget'),
         ];
         
         // Get all projects for the dashboard to display their current budgets
-        $projects = $projectQuery->orderBy('created_at', 'desc')->get();
+        $projects = $user->isAdmin()
+            ? $projectQuery->orderBy('created_at', 'desc')->get()
+            : collect();
 
         return view('dashboard', compact('stats', 'projects'));
     }

@@ -1057,7 +1057,7 @@
                     {{ Str::plural('payment', $budgetAdditions->count()) }}</div>
             </div>
             <div class="stat-card">
-                <div class="stat-lbl">Current Budget</div>
+                <div class="stat-lbl">Available Budget</div>
                 <div class="stat-val c-indigo">₱{{ number_format($project->current_budget, 0) }}</div>
                 @if ($project->current_budget > 0)
                     <div class="stat-sub">{{ $project->budget_utilization }}% used</div>
@@ -1070,6 +1070,16 @@
                 <div class="stat-lbl">Expenses</div>
                 <div class="stat-val c-red">₱{{ number_format($expenses->sum('amount'), 0) }}</div>
                 <div class="stat-sub">{{ $expenses->count() }} {{ Str::plural('entry', $expenses->count()) }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-lbl">Reserved Procurement</div>
+                <div class="stat-val c-orange">₱{{ number_format($project->reserved_procurement, 0) }}</div>
+                <div class="stat-sub">Approved requests awaiting issuance</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-lbl">Budget Before Reservations</div>
+                <div class="stat-val c-indigo">₱{{ number_format($project->current_budget + $project->reserved_procurement, 0) }}</div>
+                <div class="stat-sub">Actual balance before commitments</div>
             </div>
         </div>
 

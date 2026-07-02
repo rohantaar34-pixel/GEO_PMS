@@ -10,6 +10,7 @@ use App\Http\Controllers\MonitoringController;
 use App\Http\Controllers\ProjectReportController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\InventoryReportController;
+use App\Http\Controllers\MaterialRequestController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -39,10 +40,14 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/monitoring/submit', [MonitoringController::class, 'submit'])->name('monitoring.submit');
         Route::get('/monitoring/submit/pulse', [MonitoringController::class, 'employeePulse'])->name('monitoring.submit.pulse');
         Route::post('/monitoring/submit', [MonitoringController::class, 'store'])->name('monitoring.store');
+
+        Route::get('/material-requests/create/pulse', [MaterialRequestController::class, 'employeePulse'])->name('material-requests.create.pulse');
+        Route::get('/material-requests/create', [MaterialRequestController::class, 'create'])->name('material-requests.create');
+        Route::post('/material-requests', [MaterialRequestController::class, 'store'])->name('material-requests.store');
     });
     Route::get('/monitoring/reports/{report}/photos/{photo}', [MonitoringController::class, 'photo'])->name('monitoring.photos.show');
 
-    // ==================== ADMIN ROUTES ====================
+    // ==================== ADMIN-ONLY ROUTES ====================
     Route::middleware('role:admin')->group(function () {
         // Ledger / Projects
         Route::resource('projects', ProjectController::class)->only(['index', 'show', 'edit', 'update']);
@@ -58,6 +63,15 @@ Route::middleware(['auth'])->group(function () {
         Route::get('projects/{project}/transactions/json', [ProjectController::class, 'getTransactionsJson'])->name('projects.transactions.json');
         Route::get('projects/{project}/categories/json', [ProjectController::class, 'getCategorySummary'])->name('projects.categories.json');
 
+        // Settings
+        Route::prefix('settings')->name('settings.')->group(function () {
+            Route::resource('projects', App\Http\Controllers\Settings\ProjectController::class)->except(['show']);
+            Route::resource('users', App\Http\Controllers\Settings\UserController::class)->except(['show', 'create', 'edit']);
+        });
+    });
+
+    // ==================== ADMIN + OFFICE ENGINEER ROUTES ====================
+    Route::middleware('role:admin,office_engineer')->group(function () {
         // Document Tracker
         Route::resource('documents', DocumentController::class);
         Route::prefix('documents')->name('documents.')->group(function () {
@@ -79,11 +93,12 @@ Route::middleware(['auth'])->group(function () {
         Route::post('inventory/{inventory}/assign', [InventoryController::class, 'doAssign'])->name('inventory.doAssign');
         Route::get('inventory/{inventory}/assignments', [InventoryController::class, 'assignments'])->name('inventory.assignments');
 
-        // Settings
-        Route::prefix('settings')->name('settings.')->group(function () {
-            Route::resource('projects', App\Http\Controllers\Settings\ProjectController::class)->except(['show']);
-            Route::resource('users', App\Http\Controllers\Settings\UserController::class)->except(['show', 'create', 'edit']);
-        });
+        // Material Request Review
+        Route::get('/material-requests/pulse', [MaterialRequestController::class, 'reviewPulse'])->name('material-requests.pulse');
+        Route::get('/material-requests', [MaterialRequestController::class, 'index'])->name('material-requests.index');
+        Route::get('/material-requests/{materialRequest}', [MaterialRequestController::class, 'show'])->name('material-requests.show');
+        Route::post('/material-requests/{materialRequest}/approve', [MaterialRequestController::class, 'approve'])->name('material-requests.approve');
+        Route::post('/material-requests/{materialRequest}/reject', [MaterialRequestController::class, 'reject'])->name('material-requests.reject');
     });
 });
 

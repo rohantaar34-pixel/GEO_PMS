@@ -11,6 +11,7 @@ class InventoryAssignment extends Model
         'inventory_item_id',
         'project_id',
         'transaction_id',
+        'is_expense',
         'quantity_assigned',
         'unit_cost_at_assignment',
         'total_cost',
@@ -22,6 +23,7 @@ class InventoryAssignment extends Model
         'unit_cost_at_assignment' => 'decimal:2',
         'total_cost'              => 'decimal:2',
         'quantity_assigned'       => 'integer',
+        'is_expense'              => 'boolean',
     ];
 
     public function inventoryItem(): BelongsTo

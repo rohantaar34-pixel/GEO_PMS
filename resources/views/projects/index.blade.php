@@ -583,6 +583,14 @@
                 <div class="stat-lbl">Expenses</div>
                 <div class="stat-val c-red">₱{{ number_format($summary['total_expense'], 0) }}</div>
             </div>
+            <div class="stat-card">
+                <div class="stat-lbl">Reserved Procurement</div>
+                <div class="stat-val c-orange">₱{{ number_format($summary['total_reserved_procurement'], 0) }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-lbl">Available Budget</div>
+                <div class="stat-val c-indigo">₱{{ number_format($summary['total_balance'], 0) }}</div>
+            </div>
         </div>
 
         {{-- Desktop layout wrapper --}}
@@ -622,6 +630,11 @@
                                         </svg>
                                         ₱{{ number_format($project->total_expense, 0) }}
                                     </span>
+                                    @if($project->reserved_procurement > 0)
+                                        <span class="proj-meta-item" style="color:var(--orange);">
+                                            Reserved ₱{{ number_format($project->reserved_procurement, 0) }}
+                                        </span>
+                                    @endif
                                     @php $totalBudget = $project->budget + $project->total_budget_additions; @endphp
                                     @if ($totalBudget > 0)
                                         <span class="proj-meta-item">{{ $project->budget_utilization }}% used</span>
@@ -636,7 +649,7 @@
                                 @endif
                             </div>
                             <div class="proj-balance">
-                                <div class="proj-balance-lbl">Balance</div>
+                                <div class="proj-balance-lbl">Available</div>
                                 <div
                                     class="proj-balance-val {{ $project->current_budget >= 0 ? 'c-indigo' : 'c-orange' }}">
                                     ₱{{ number_format($project->current_budget, 0) }}

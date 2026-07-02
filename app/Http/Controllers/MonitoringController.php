@@ -201,7 +201,7 @@ class MonitoringController extends Controller
         $photo = $report->photos()->whereKey($photo)->firstOrFail();
         $user = Auth::user();
 
-        if ($user->isEmployee() && $report->user_id !== $user->id) {
+        if (!$user->canManageOperations() && $report->user_id !== $user->id) {
             abort(403);
         }
 

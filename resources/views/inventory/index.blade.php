@@ -200,14 +200,12 @@
                 </div>
                 <div>
                     <label class="field-lbl">Category</label>
-                    <input class="field-in" type="text" name="category" placeholder="e.g. Materials" value="{{ old('category') }}" list="cat-list">
-                    <datalist id="cat-list">
-                        <option value="Materials">
-                        <option value="Equipment">
-                        <option value="Supplies">
-                        <option value="Tools">
-                        <option value="Consumables">
-                    </datalist>
+                    <select class="field-in" name="category">
+                        <option value="">Select category</option>
+                        @foreach($categories as $category)
+                            <option value="{{ $category }}" @selected(old('category') === $category)>{{ $category }}</option>
+                        @endforeach
+                    </select>
                 </div>
                 <div>
                     <label class="field-lbl">Unit *</label>
@@ -321,7 +319,12 @@
                     </div>
                     <div>
                         <label class="field-lbl">Category</label>
-                        <input class="field-in" type="text" name="category" id="edit_category" list="cat-list">
+                        <select class="field-in" name="category" id="edit_category">
+                            <option value="">Select category</option>
+                            @foreach($categories as $category)
+                                <option value="{{ $category }}">{{ $category }}</option>
+                            @endforeach
+                        </select>
                     </div>
                 </div>
                 <div class="form-row" style="grid-template-columns:1fr 1fr 1fr;">
@@ -395,7 +398,9 @@ function toggleAssignments(id) {
             content.innerHTML = data.map(a =>
                 `<div class="assign-row">
                     <span><strong>${a.project_name}</strong> — ${a.quantity} ${''} units on ${a.date}</span>
-                    <span style="font-weight:700;color:var(--inv);">₱${parseFloat(a.total_cost).toLocaleString('en-PH', {minimumFractionDigits:2})}</span>
+                    <span style="font-weight:700;color:var(--inv);">${a.is_expense
+                        ? 'Expense PHP ' + parseFloat(a.total_cost).toLocaleString('en-PH', {minimumFractionDigits:2})
+                        : 'Stock only - no expense'}</span>
                 </div>`
             ).join('');
         });

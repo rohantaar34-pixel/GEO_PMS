@@ -30,7 +30,7 @@ class UserController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'confirmed', Password::min(6)],
-            'role' => ['required', Rule::in(['admin', 'employee'])],
+            'role' => ['required', Rule::in(['admin', 'employee', 'office_engineer'])],
             'project_ids' => ['nullable', 'array'],
             'project_ids.*' => ['integer', 'exists:projects,id'],
         ]);
@@ -58,7 +58,7 @@ class UserController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
             'password' => ['nullable', 'confirmed', Password::min(6)],
-            'role' => ['required', Rule::in(['admin', 'employee'])],
+            'role' => ['required', Rule::in(['admin', 'employee', 'office_engineer'])],
             'project_ids' => ['nullable', 'array'],
             'project_ids.*' => ['integer', 'exists:projects,id'],
         ]);

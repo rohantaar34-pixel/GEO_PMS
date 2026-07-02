@@ -8,6 +8,7 @@
     .page-sub, .muted { color:#6b7280; font-size:14px; }
     .btn { display:inline-flex; align-items:center; justify-content:center; border:0; border-radius:8px; padding:11px 14px; font-weight:800; font-size:13px; cursor:pointer; text-decoration:none; }
     .btn-dashboard { background:#eef2ff; color:#4f46e5; }
+    .btn-material { background:#ecfeff; color:#0e7490; }
     .btn-submit { background:#4f46e5; color:#fff; width:100%; }
     .grid { display:grid; grid-template-columns:minmax(300px,.8fr) minmax(360px,1.2fr); gap:18px; align-items:start; }
     .panel, .history-card { background:#fff; border:1px solid #e5e7eb; border-radius:8px; overflow:hidden; }
@@ -66,6 +67,7 @@
         </div>
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
             <span class="live-pill"><span class="live-dot"></span><span id="liveStatus">Live</span></span>
+            <a href="{{ route('material-requests.create') }}" class="btn btn-material">Material Requests</a>
             <a href="{{ route('dashboard') }}" class="btn btn-dashboard">Dashboard</a>
         </div>
     </div>

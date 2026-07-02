@@ -60,6 +60,16 @@ class User extends Authenticatable
         return $this->role === 'employee';
     }
 
+    public function isOfficeEngineer(): bool
+    {
+        return $this->role === 'office_engineer';
+    }
+
+    public function canManageOperations(): bool
+    {
+        return $this->isAdmin() || $this->isOfficeEngineer();
+    }
+
     public function assignedProjects(): BelongsToMany
     {
         return $this->belongsToMany(Project::class)->withTimestamps();

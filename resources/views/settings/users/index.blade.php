@@ -233,6 +233,7 @@
     }
     .role-admin { background: #fee2e2; color: #991b1b; }
     .role-employee { background: #eef2ff; color: #3730a3; }
+    .role-office_engineer { background: #ecfeff; color: #155e75; }
     .help-text {
         color: #6b7280;
         font-size: 12px;
@@ -312,7 +313,7 @@
                         </td>
                         <td>{{ $user->email }}</td>
                         <td>
-                            <span class="role-badge role-{{ $user->role }}">{{ ucfirst($user->role) }}</span>
+                            <span class="role-badge role-{{ $user->role }}">{{ Str::of($user->role)->replace('_', ' ')->title() }}</span>
                         </td>
                         <td class="muted">
                             @if($user->isEmployee())
@@ -382,6 +383,7 @@
                 <label>Role *</label>
                 <select name="role" id="addRole" onchange="toggleProjectAssignments('add')" required>
                     <option value="employee" @selected(old('role') === 'employee')>Employee</option>
+                    <option value="office_engineer" @selected(old('role') === 'office_engineer')>Office Engineer</option>
                     <option value="admin" @selected(old('role') === 'admin')>Admin</option>
                 </select>
             </div>
@@ -434,6 +436,7 @@
                 <label>Role *</label>
                 <select name="role" id="editRole" onchange="toggleProjectAssignments('edit')" required>
                     <option value="employee">Employee</option>
+                    <option value="office_engineer">Office Engineer</option>
                     <option value="admin">Admin</option>
                 </select>
             </div>

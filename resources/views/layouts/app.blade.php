@@ -97,7 +97,7 @@
         <nav class="bg-white border-b-4 border-red-600 sticky top-0 z-40 shadow-sm">
             <div class="w-full px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
 
-                <a href="{{ Auth::check() && Auth::user()->isEmployee() ? route('monitoring.submit') : route('projects.index') }}"
+                <a href="{{ Auth::check() && Auth::user()->isEmployee() ? route('monitoring.submit') : (Auth::check() && Auth::user()->isOfficeEngineer() ? route('monitoring.index') : route('dashboard')) }}"
                     class="flex items-center gap-2 sm:gap-3 flex-shrink-0 hover:opacity-80 transition-opacity">
                     <img src="{{ asset('images/logo.jpg') }}" alt="ARDC Logo"
                         class="h-10 sm:h-12 w-auto object-contain">
@@ -135,7 +135,7 @@
 
                 @if (session('success'))
                     <div
-                        class="mb-6 sm:mb-8 p-4 px-4 sm:px-6 bg-gradient-to-r from-red-50 to-red-100 border-2 border-red-600 text-red-700 rounded-xl flex items-center gap-3 animate-fade-in">
+                        class="mb-6 sm:mb-8 p-4 px-4 sm:px-6 bg-gradient-to-r from-green-50 to-emerald-100 border-2 border-green-600 text-green-700 rounded-xl flex items-center gap-3 animate-fade-in">
                         <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd"
                                 d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
