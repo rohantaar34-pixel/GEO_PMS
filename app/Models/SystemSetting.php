@@ -88,7 +88,13 @@ class SystemSetting extends Model
             return Storage::disk('public')->url($this->logo_path);
         }
 
-        return asset('images/logo.jpg');
+        foreach (['images/Logo.jpg', 'images/logo.jpg'] as $path) {
+            if (file_exists(public_path($path))) {
+                return asset($path);
+            }
+        }
+
+        return asset('images/Logo.jpg');
     }
 
     private function normalizeHex(string $color): string
