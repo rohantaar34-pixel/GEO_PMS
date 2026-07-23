@@ -191,7 +191,7 @@
                     <div class="f-group">
                         <label for="email">Email Address</label>
                         <input type="email" id="email" name="email" value="{{ old('email') }}"
-                            placeholder="you@ardc.com" autocomplete="email" autofocus
+                            placeholder="you@example.com" autocomplete="email" autofocus
                             class="{{ $errors->has('email') ? 'is-err' : '' }}">
                     </div>
 

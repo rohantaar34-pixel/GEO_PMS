@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\SystemSetting;
 use App\Models\Project;
 use Illuminate\Http\Response;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -13,7 +14,6 @@ use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use Dompdf\Dompdf;
 use Dompdf\Options;
 use PhpOffice\PhpWord\PhpWord;
-use Illuminate\Support\Facades\Storage;
 
 class ProjectReportController extends Controller
 {
@@ -53,11 +53,15 @@ class ProjectReportController extends Controller
 
     private function getLogoBase64(): string
     {
-        $logoPath = public_path('images/Logo.jpg');
-        if (file_exists($logoPath)) {
+        $logoPath = SystemSetting::current()->logo_file_path;
+
+        if ($logoPath && file_exists($logoPath)) {
+            $mimeType = mime_content_type($logoPath) ?: 'image/png';
             $imageData = base64_encode(file_get_contents($logoPath));
-            return 'data:image/jpeg;base64,' . $imageData;
+
+            return "data:{$mimeType};base64,{$imageData}";
         }
+
         return '';
     }
 
@@ -336,8 +340,8 @@ class ProjectReportController extends Controller
         ]);
 
         // Add logo (if exists)
-        $logoPath = public_path('images/Logo.jpg');
-        if (file_exists($logoPath)) {
+        $logoPath = SystemSetting::current()->logo_file_path;
+        if ($logoPath && file_exists($logoPath)) {
             $section->addImage($logoPath, ['width' => 80, 'height' => 80, 'alignment' => 'center']);
         }
 

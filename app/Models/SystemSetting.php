@@ -8,6 +8,21 @@ use Illuminate\Support\Facades\Storage;
 
 class SystemSetting extends Model
 {
+    private const DEFAULTS = [
+        'settings_key' => 'default',
+        'system_name' => 'GEO CORP. Project Budget Tracking',
+        'system_short_name' => 'GEO CORP.',
+        'system_tagline' => 'Budget Tracking',
+        'primary_color' => '#0F6FB0',
+        'logo_path' => null,
+    ];
+
+    private const BUNDLED_LOGO_CANDIDATES = [
+        'images/logo.png',
+        'images/Logo.jpg',
+        'images/logo.jpg',
+    ];
+
     protected $fillable = [
         'settings_key',
         'system_name',
@@ -31,14 +46,7 @@ class SystemSetting extends Model
 
     public static function defaults(): array
     {
-        return [
-            'settings_key' => 'default',
-            'system_name' => 'ARDC Project Management System',
-            'system_short_name' => 'ARDC',
-            'system_tagline' => 'Management System',
-            'primary_color' => '#BE0000',
-            'logo_path' => null,
-        ];
+        return self::DEFAULTS;
     }
 
     public function getResolvedNameAttribute(): string
@@ -84,17 +92,28 @@ class SystemSetting extends Model
 
     public function getLogoUrlAttribute(): string
     {
-        if ($this->logo_path) {
+        if ($this->logo_path && Storage::disk('public')->exists($this->logo_path)) {
             return Storage::disk('public')->url($this->logo_path);
         }
 
-        foreach (['images/Logo.jpg', 'images/logo.jpg'] as $path) {
-            if (file_exists(public_path($path))) {
-                return asset($path);
-            }
+        $bundledLogoPath = $this->resolveBundledLogoPath();
+
+        if ($bundledLogoPath) {
+            return asset($bundledLogoPath);
         }
 
-        return asset('images/Logo.jpg');
+        return asset(self::BUNDLED_LOGO_CANDIDATES[0]);
+    }
+
+    public function getLogoFilePathAttribute(): ?string
+    {
+        if ($this->logo_path && Storage::disk('public')->exists($this->logo_path)) {
+            return Storage::disk('public')->path($this->logo_path);
+        }
+
+        $bundledLogoPath = $this->resolveBundledLogoPath();
+
+        return $bundledLogoPath ? public_path($bundledLogoPath) : null;
     }
 
     private function normalizeHex(string $color): string
@@ -129,5 +148,16 @@ class SystemSetting extends Model
         $blue = (int) round(($baseBlue * (1 - $weight)) + ($mixBlue * $weight));
 
         return sprintf('#%02X%02X%02X', $red, $green, $blue);
+    }
+
+    private function resolveBundledLogoPath(): ?string
+    {
+        foreach (self::BUNDLED_LOGO_CANDIDATES as $path) {
+            if (file_exists(public_path($path))) {
+                return $path;
+            }
+        }
+
+        return null;
     }
 }

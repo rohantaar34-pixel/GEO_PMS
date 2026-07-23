@@ -34,7 +34,8 @@ mkdir -p storage/framework/cache storage/framework/sessions storage/framework/te
 chown -R www-data:www-data storage bootstrap/cache
 chmod -R ug+rw storage bootstrap/cache
 
-php artisan migrate --force
+php artisan optimize:clear --ansi
+php artisan migrate --force --seed
 php artisan storage:link --force
 
 exec "$@"

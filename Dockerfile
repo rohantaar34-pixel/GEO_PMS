@@ -31,7 +31,8 @@ RUN npm ci
 
 COPY . .
 
-RUN npm run build \
+RUN rm -rf public/build \
+    && npm run build \
     && npm prune --omit=dev --ignore-scripts \
     && composer dump-autoload --optimize \
     && php artisan package:discover --ansi \

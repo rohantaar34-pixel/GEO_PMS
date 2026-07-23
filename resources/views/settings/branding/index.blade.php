@@ -339,14 +339,14 @@
                                 <label for="system_short_name">Short Name</label>
                                 <input type="text" id="system_short_name" name="system_short_name"
                                     value="{{ old('system_short_name', $settings->system_short_name) }}"
-                                    placeholder="ARDC">
+                                    placeholder="GEO CORP.">
                             </div>
 
                             <div class="form-group full">
                                 <label for="system_tagline">Tagline</label>
                                 <input type="text" id="system_tagline" name="system_tagline"
                                     value="{{ old('system_tagline', $settings->system_tagline) }}"
-                                    placeholder="Project Management">
+                                    placeholder="Budget Tracking">
                             </div>
 
                             <div class="form-group full">
