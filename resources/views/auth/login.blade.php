@@ -21,7 +21,7 @@
         }
 
         .login-card-head {
-            background: var(--brand-primary);
+            background: linear-gradient(135deg, var(--brand-primary) 0%, var(--brand-accent) 100%);
             padding: 32px 36px 28px;
             text-align: center;
         }
@@ -36,7 +36,7 @@
         }
 
         .login-card-head p {
-            color: rgba(255, 255, 255, .72);
+            color: rgba(255, 255, 255, .65);
             font-size: .78rem;
             letter-spacing: .06em;
             text-transform: uppercase;
@@ -97,13 +97,13 @@
         }
 
         .f-group input:focus {
-            border-color: var(--brand-primary);
+            border-color: var(--brand-accent);
             background: #fff;
-            box-shadow: 0 0 0 3px rgba(var(--brand-primary-rgb), .14);
+            box-shadow: 0 0 0 3px rgba(var(--brand-primary-rgb), .12);
         }
 
         .f-group input.is-err {
-            border-color: var(--brand-primary);
+            border-color: var(--brand-accent);
             background: #fff8f8;
         }
 
@@ -115,7 +115,7 @@
         }
 
         .remember-row input[type="checkbox"] {
-            accent-color: var(--brand-primary);
+            accent-color: var(--brand-accent);
             width: 15px;
             height: 15px;
             cursor: pointer;
@@ -133,7 +133,7 @@
         .btn-signin {
             width: 100%;
             padding: 13px;
-            background: var(--brand-primary);
+            background: linear-gradient(135deg, var(--brand-primary) 0%, var(--brand-accent) 100%);
             color: #fff;
             border: none;
             border-radius: 8px;
@@ -148,7 +148,7 @@
         }
 
         .btn-signin:hover {
-            background: var(--brand-primary-dark);
+            background: linear-gradient(135deg, var(--brand-primary-dark) 0%, var(--brand-accent-dark) 100%);
             box-shadow: 0 6px 20px rgba(var(--brand-primary-rgb), .38);
         }
 
@@ -169,7 +169,7 @@
         <div class="login-card">
             <div class="login-card-head">
                 <h2>Sign In</h2>
-                <p>{{ $systemSettings->resolved_name }}</p>
+                <p>Restricted - authorized personnel only</p>
             </div>
 
             <div class="login-card-body">
