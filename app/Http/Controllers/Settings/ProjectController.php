@@ -7,7 +7,6 @@ use App\Models\Project;
 use App\Models\Document;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 
 class ProjectController extends Controller
@@ -102,26 +101,11 @@ class ProjectController extends Controller
     {
         try {
             $projectName = $project->name;
-            
-            // Delete associated documents in the document tracker
-            $documents = Document::where('project_id', $project->id)->get();
-            foreach ($documents as $document) {
-                if ($document->file_path && Storage::disk('public')->exists($document->file_path)) {
-                    Storage::disk('public')->delete($document->file_path);
-                }
-                if ($document->scanned_image_path && Storage::disk('public')->exists($document->scanned_image_path)) {
-                    Storage::disk('public')->delete($document->scanned_image_path);
-                }
-                if ($document->thumbnail_path && Storage::disk('public')->exists($document->thumbnail_path)) {
-                    Storage::disk('public')->delete($document->thumbnail_path);
-                }
-                $document->delete();
-            }
 
             $project->delete();
 
             return redirect()->route('settings.projects.index')
-                ->with('success', 'Project "' . $projectName . '" and its associated documents deleted successfully');
+                ->with('success', 'Project "' . $projectName . '" and all associated data deleted successfully');
         } catch (\Exception $e) {
             Log::error('Error in Settings\ProjectController@destroy: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Error deleting project: ' . $e->getMessage());

@@ -1326,7 +1326,12 @@
                                                 </div>
                                                 <form
                                                     :action="`/projects/{{ $project->id }}/transactions/${transaction.id}`"
-                                                    method="POST" onsubmit="return confirm('Remove this transaction?')">
+                                                    method="POST"
+                                                    data-confirm
+                                                    data-confirm-title="Remove transaction?"
+                                                    data-confirm-message="Remove this transaction from the project ledger?"
+                                                    data-confirm-button="Remove transaction"
+                                                    data-confirm-variant="danger">
                                                     @csrf @method('DELETE')
                                                     <button type="submit" class="btn-del">
                                                         <svg width="14" height="14" viewBox="0 0 24 24"
@@ -1396,7 +1401,12 @@
                                                 </div>
                                                 <form
                                                     :action="`/projects/{{ $project->id }}/transactions/${transaction.id}`"
-                                                    method="POST" onsubmit="return confirm('Remove this transaction?')">
+                                                    method="POST"
+                                                    data-confirm
+                                                    data-confirm-title="Remove transaction?"
+                                                    data-confirm-message="Remove this transaction from the project ledger?"
+                                                    data-confirm-button="Remove transaction"
+                                                    data-confirm-variant="danger">
                                                     @csrf @method('DELETE')
                                                     <button type="submit" class="btn-del">
                                                         <svg width="14" height="14" viewBox="0 0 24 24"

@@ -5,10 +5,24 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 // Remove this line: use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Document extends Model
 {
+    public const DOCUMENT_TYPES = [
+        'contract' => 'Contract',
+        'invoice' => 'Invoice',
+        'report' => 'Report',
+    ];
+
+    public const CATEGORIES = [
+        'financial' => 'Financial',
+        'legal' => 'Legal',
+        'technical' => 'Technical',
+        'administrative' => 'Administrative',
+    ];
+
     // Remove this line: use SoftDeletes;
     
     protected $table = 'documents';
@@ -92,6 +106,41 @@ class Document extends Model
         }
         return null;
     }
+
+    public function getDocumentTypeDisplayAttribute(): string
+    {
+        return $this->formatSelectableValue($this->document_type, 'Other');
+    }
+
+    public function getCategoryDisplayAttribute(): string
+    {
+        return $this->formatSelectableValue($this->category, 'None');
+    }
+
+    public function getDocumentTypeOptionValueAttribute(): string
+    {
+        return $this->optionValue($this->document_type, array_keys(self::DOCUMENT_TYPES), 'contract');
+    }
+
+    public function getCategoryOptionValueAttribute(): string
+    {
+        return $this->optionValue($this->category, array_keys(self::CATEGORIES), '');
+    }
+
+    public function getDocumentTypeCustomValueAttribute(): string
+    {
+        return $this->customSelectableValue($this->document_type, array_keys(self::DOCUMENT_TYPES));
+    }
+
+    public function getCategoryCustomValueAttribute(): string
+    {
+        return $this->customSelectableValue($this->category, array_keys(self::CATEGORIES));
+    }
+
+    public function getDocumentTypeCssClassAttribute(): string
+    {
+        return array_key_exists((string) $this->document_type, self::DOCUMENT_TYPES) ? (string) $this->document_type : 'other';
+    }
     
     // Scopes
     public function scopeActive($query)
@@ -118,5 +167,56 @@ class Document extends Model
     public function incrementDownloadCount()
     {
         $this->increment('download_count');
+    }
+
+    public static function documentTypeOptions(): array
+    {
+        return self::DOCUMENT_TYPES;
+    }
+
+    public static function categoryOptions(): array
+    {
+        return self::CATEGORIES;
+    }
+
+    private function optionValue(?string $value, array $standardValues, string $default): string
+    {
+        $value = trim((string) $value);
+
+        if ($value === '') {
+            return $default;
+        }
+
+        if (in_array($value, $standardValues, true) || $value === 'other') {
+            return $value;
+        }
+
+        return 'other';
+    }
+
+    private function customSelectableValue(?string $value, array $standardValues): string
+    {
+        $value = trim((string) $value);
+
+        if ($value === '' || $value === 'other' || in_array($value, $standardValues, true)) {
+            return '';
+        }
+
+        return $value;
+    }
+
+    private function formatSelectableValue(?string $value, string $fallback): string
+    {
+        $value = trim((string) $value);
+
+        if ($value === '') {
+            return $fallback;
+        }
+
+        if (preg_match('/[A-Z]/', $value)) {
+            return $value;
+        }
+
+        return Str::headline(str_replace('_', ' ', $value));
     }
 }

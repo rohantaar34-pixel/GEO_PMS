@@ -174,12 +174,12 @@
 
         <div class="detail-item">
             <div class="detail-label">Document Type</div>
-            <div class="detail-value">{{ ucfirst($document->document_type) }}</div>
+            <div class="detail-value">{{ $document->document_type_display }}</div>
         </div>
 
         <div class="detail-item">
             <div class="detail-label">Category</div>
-            <div class="detail-value">{{ ucfirst($document->category ?? 'None') }}</div>
+            <div class="detail-value">{{ $document->category_display }}</div>
         </div>
 
         <div class="detail-item">

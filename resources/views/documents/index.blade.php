@@ -168,6 +168,11 @@
     }
     .folder-name { font-size: 15px; font-weight: 700; color: var(--ink); margin-bottom: 2px; }
     .folder-count { font-size: 12px; color: var(--ink-3); }
+    .folder-link {
+        display: inline-block;
+        text-decoration: none;
+    }
+    .folder-link:hover .folder-name { color: var(--indigo-dark); }
     .btn-add-to-folder {
         display: inline-flex; align-items: center; gap: 4px;
         padding: 6px 12px;
@@ -324,7 +329,7 @@
             <option value="contract" {{ request('type') == 'contract' ? 'selected' : '' }}>Contract</option>
             <option value="invoice" {{ request('type') == 'invoice' ? 'selected' : '' }}>Invoice</option>
             <option value="report" {{ request('type') == 'report' ? 'selected' : '' }}>Report</option>
-            <option value="other" {{ request('type') == 'other' ? 'selected' : '' }}>Other</option>
+            <option value="other" {{ request('type') == 'other' ? 'selected' : '' }}>Other / Custom</option>
         </select>
         <select name="status">
             <option value="">All Status</option>
@@ -375,8 +380,8 @@
                             </td>
                             <td>
                                 <span style="display:inline-flex; align-items:center; gap:6px;">
-                                    <span class="doc-type-dot type-{{ $document->document_type }}" style="width:8px;height:8px;border-radius:50%;display:inline-block;"></span>
-                                    {{ ucfirst($document->document_type) }}
+                                    <span class="doc-type-dot type-{{ $document->document_type_css_class }}" style="width:8px;height:8px;border-radius:50%;display:inline-block;"></span>
+                                    {{ $document->document_type_display }}
                                 </span>
                             </td>
                             <td>
@@ -426,8 +431,10 @@
                             <div class="folder-icon">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
                             </div>
-                            <div class="folder-name">{{ $proj->name }}</div>
-                            <div class="folder-count">{{ $totalProjDocs }} {{ Str::plural('document', $totalProjDocs) }}</div>
+                            <a href="{{ route('documents.projects.show', $proj) }}" class="folder-link">
+                                <div class="folder-name">{{ $proj->name }}</div>
+                                <div class="folder-count">{{ $totalProjDocs }} {{ Str::plural('document', $totalProjDocs) }}</div>
+                            </a>
                         </div>
                         <a href="{{ route('documents.create') }}?project_id={{ $proj->id }}" class="btn-add-to-folder">
                             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -439,7 +446,7 @@
                         @php $shownDocs = \App\Models\Document::with('project')->where('project_id', $proj->id)->latest('date_added')->take(4)->get(); @endphp
                         @forelse($shownDocs as $doc)
                             <div class="doc-row">
-                                <div class="doc-type-dot type-{{ $doc->document_type }}"></div>
+                                <div class="doc-type-dot type-{{ $doc->document_type_css_class }}"></div>
                                 <div class="doc-info">
                                     <div class="doc-name">{{ $doc->title }}</div>
                                     <div class="doc-meta">{{ $doc->document_number }} · {{ $doc->date_added->format('M d, Y') }}</div>
@@ -457,11 +464,9 @@
                         @endforelse
                     </div>
 
-                    @if($totalProjDocs > 4)
-                        <a href="{{ route('documents.index') }}?project_id={{ $proj->id }}&view=list" class="folder-see-all">
-                            See all {{ $totalProjDocs }} documents →
-                        </a>
-                    @endif
+                    <a href="{{ route('documents.projects.show', $proj) }}" class="folder-see-all">
+                        See all {{ $totalProjDocs }} documents →
+                    </a>
                 </div>
             @endforeach
 
@@ -482,7 +487,7 @@
                     <div class="folder-docs">
                         @foreach(\App\Models\Document::whereNull('project_id')->latest('date_added')->take(3)->get() as $doc)
                             <div class="doc-row">
-                                <div class="doc-type-dot type-{{ $doc->document_type }}"></div>
+                                <div class="doc-type-dot type-{{ $doc->document_type_css_class }}"></div>
                                 <div class="doc-info">
                                     <div class="doc-name">{{ $doc->title }}</div>
                                     <div class="doc-meta">{{ $doc->document_number }} · {{ $doc->date_added->format('M d, Y') }}</div>

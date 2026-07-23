@@ -5,15 +5,49 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Storage;
 use App\Models\InventoryAssignment;
 
 class Project extends Model
 {
     protected $fillable = ['name', 'description', 'budget', 'status', 'completion_percentage'];
-    
+
+    protected static function booted(): void
+    {
+        static::deleting(function (Project $project) {
+            $project->loadMissing([
+                'documents',
+                'transactions',
+                'monitoringReports.photos',
+            ]);
+
+            foreach ($project->documents as $document) {
+                static::deletePublicFile($document->file_path);
+                static::deletePublicFile($document->scanned_image_path);
+                static::deletePublicFile($document->thumbnail_path);
+                $document->delete();
+            }
+
+            foreach ($project->transactions as $transaction) {
+                static::deletePublicFile($transaction->proof_image);
+            }
+
+            foreach ($project->monitoringReports as $report) {
+                foreach ($report->photos as $photo) {
+                    static::deletePublicFile($photo->path);
+                }
+            }
+        });
+    }
+
     public function transactions(): HasMany
     {
         return $this->hasMany(Transaction::class);
+    }
+
+    public function documents(): HasMany
+    {
+        return $this->hasMany(Document::class);
     }
 
     public function inventoryAssignments(): HasMany
@@ -127,5 +161,16 @@ class Project extends Model
             $this->completion_percentage >= 25 => '#f97316',
             default => '#dc2626',
         };
+    }
+
+    private static function deletePublicFile(?string $path): void
+    {
+        if (! $path) {
+            return;
+        }
+
+        if (Storage::disk('public')->exists($path)) {
+            Storage::disk('public')->delete($path);
+        }
     }
 }

@@ -11,6 +11,7 @@ use App\Http\Controllers\ProjectReportController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\InventoryReportController;
 use App\Http\Controllers\MaterialRequestController;
+use App\Http\Controllers\Settings\BrandingController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -48,7 +49,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/monitoring/reports/{report}/photos/{photo}', [MonitoringController::class, 'photo'])->name('monitoring.photos.show');
 
     // ==================== ADMIN-ONLY ROUTES ====================
-    Route::middleware('role:admin')->group(function () {
+    Route::middleware('role:admin,super_admin')->group(function () {
         // Ledger / Projects
         Route::resource('projects', ProjectController::class)->only(['index', 'show', 'edit', 'update']);
         Route::post('projects/{project}/transactions', [ProjectController::class, 'addTransaction'])
@@ -67,14 +68,19 @@ Route::middleware(['auth'])->group(function () {
         Route::prefix('settings')->name('settings.')->group(function () {
             Route::resource('projects', App\Http\Controllers\Settings\ProjectController::class)->except(['show']);
             Route::resource('users', App\Http\Controllers\Settings\UserController::class)->except(['show', 'create', 'edit']);
+            Route::middleware('role:super_admin')->group(function () {
+                Route::get('branding', [BrandingController::class, 'index'])->name('branding.index');
+                Route::put('branding', [BrandingController::class, 'update'])->name('branding.update');
+            });
         });
     });
 
     // ==================== ADMIN + OFFICE ENGINEER ROUTES ====================
-    Route::middleware('role:admin,office_engineer')->group(function () {
+    Route::middleware('role:admin,super_admin,office_engineer')->group(function () {
         // Document Tracker
         Route::resource('documents', DocumentController::class);
         Route::prefix('documents')->name('documents.')->group(function () {
+            Route::get('/projects/{project}', [DocumentController::class, 'project'])->name('projects.show');
             Route::get('/{document}/download', [DocumentController::class, 'download'])->name('download');
         });
 

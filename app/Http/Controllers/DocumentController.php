@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class DocumentController extends Controller
 {
@@ -17,7 +18,11 @@ class DocumentController extends Controller
         
         // Filter by document type
         if ($request->has('type') && $request->type != '') {
-            $query->where('document_type', $request->type);
+            if ($request->type === 'other') {
+                $query->whereNotIn('document_type', array_keys(Document::documentTypeOptions()));
+            } else {
+                $query->where('document_type', $request->type);
+            }
         }
         
         // Filter by category
@@ -66,14 +71,55 @@ class DocumentController extends Controller
         
         return view('documents.create', compact('projects', 'documentNumber'));
     }
+
+    public function project(Request $request, Project $project)
+    {
+        $query = Document::with(['project', 'uploader'])
+            ->where('project_id', $project->id);
+
+        if ($request->has('type') && $request->type !== '') {
+            if ($request->type === 'other') {
+                $query->whereNotIn('document_type', array_keys(Document::documentTypeOptions()));
+            } else {
+                $query->where('document_type', $request->type);
+            }
+        }
+
+        if ($request->has('status') && $request->status !== '') {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->has('search') && $request->search !== '') {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('document_number', 'like', "%{$search}%")
+                    ->orWhere('title', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
+        $documents = $query->latest('date_added')->paginate(12)->withQueryString();
+
+        $statsBase = Document::where('project_id', $project->id);
+        $stats = [
+            'total' => (clone $statsBase)->count(),
+            'active' => (clone $statsBase)->where('status', 'active')->count(),
+            'with_file' => (clone $statsBase)->whereNotNull('file_path')->count(),
+            'with_scan' => (clone $statsBase)->whereNotNull('scanned_image_path')->count(),
+        ];
+
+        return view('documents.project', compact('project', 'documents', 'stats'));
+    }
     
     public function store(Request $request)
     {
         $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'document_type' => 'required|string',
-            'category' => 'nullable|string',
+            'document_type' => ['required', 'string', Rule::in([...array_keys(Document::documentTypeOptions()), 'other'])],
+            'document_type_other' => 'nullable|required_if:document_type,other|string|max:255',
+            'category' => ['nullable', 'string', Rule::in([...array_keys(Document::categoryOptions()), 'other'])],
+            'category_other' => 'nullable|required_if:category,other|string|max:255',
             'document_date' => 'nullable|date',
             'expiry_date' => 'nullable|date|after:document_date',
             'project_id' => 'nullable|exists:projects,id',
@@ -85,8 +131,14 @@ class DocumentController extends Controller
         $document->document_number = $request->document_number ?? $this->generateDocumentNumber();
         $document->title = $request->title;
         $document->description = $request->description;
-        $document->document_type = $request->document_type;
-        $document->category = $request->category;
+        $document->document_type = $this->resolveSelectableValue(
+            $request->document_type,
+            $request->document_type_other
+        );
+        $document->category = $this->resolveSelectableValue(
+            $request->category,
+            $request->category_other
+        );
         $document->document_date = $request->document_date;
         $document->expiry_date = $request->expiry_date;
         $document->project_id = $request->project_id;
@@ -139,8 +191,10 @@ class DocumentController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'document_type' => 'required|string',
-            'category' => 'nullable|string',
+            'document_type' => ['required', 'string', Rule::in([...array_keys(Document::documentTypeOptions()), 'other'])],
+            'document_type_other' => 'nullable|required_if:document_type,other|string|max:255',
+            'category' => ['nullable', 'string', Rule::in([...array_keys(Document::categoryOptions()), 'other'])],
+            'category_other' => 'nullable|required_if:category,other|string|max:255',
             'document_date' => 'nullable|date',
             'expiry_date' => 'nullable|date|after:document_date',
             'project_id' => 'nullable|exists:projects,id',
@@ -151,8 +205,14 @@ class DocumentController extends Controller
         
         $document->title = $request->title;
         $document->description = $request->description;
-        $document->document_type = $request->document_type;
-        $document->category = $request->category;
+        $document->document_type = $this->resolveSelectableValue(
+            $request->document_type,
+            $request->document_type_other
+        );
+        $document->category = $this->resolveSelectableValue(
+            $request->category,
+            $request->category_other
+        );
         $document->document_date = $request->document_date;
         $document->expiry_date = $request->expiry_date;
         $document->project_id = $request->project_id;
@@ -479,5 +539,22 @@ class DocumentController extends Controller
         }
         
         return "{$prefix}-{$year}{$month}-{$newNumber}";
+    }
+
+    private function resolveSelectableValue(?string $selectedValue, ?string $customValue): ?string
+    {
+        $selectedValue = trim((string) $selectedValue);
+
+        if ($selectedValue === '') {
+            return null;
+        }
+
+        if ($selectedValue !== 'other') {
+            return $selectedValue;
+        }
+
+        $customValue = Str::of((string) $customValue)->squish()->toString();
+
+        return $customValue === '' ? 'other' : $customValue;
     }
 }

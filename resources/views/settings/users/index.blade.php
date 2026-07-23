@@ -231,6 +231,7 @@
         text-transform: uppercase;
         letter-spacing: .04em;
     }
+    .role-super_admin { background: #ede9fe; color: #6d28d9; }
     .role-admin { background: #fee2e2; color: #991b1b; }
     .role-employee { background: #eef2ff; color: #3730a3; }
     .role-office_engineer { background: #ecfeff; color: #155e75; }
@@ -279,6 +280,9 @@
     <div class="settings-tabs">
         <a href="{{ route('settings.projects.index') }}" class="settings-tab">Projects</a>
         <a href="{{ route('settings.users.index') }}" class="settings-tab active">Users</a>
+        @if(Auth::user()->isSuperAdmin())
+            <a href="{{ route('settings.branding.index') }}" class="settings-tab">Branding</a>
+        @endif
     </div>
 
     <div style="margin-bottom: 20px;">
@@ -332,18 +336,30 @@
                         </td>
                         <td>
                             <div class="action-row">
-                                <button
-                                    type="button"
-                                    class="action-btn btn-edit"
-                                    onclick="openEditModal({{ $user->id }}, @js($user->name), @js($user->email), @js($user->role), @js($user->assignedProjects->pluck('id')->values()->all()))"
-                                >
-                                    Edit
-                                </button>
-                                <form action="{{ route('settings.users.destroy', $user) }}" method="POST" onsubmit="return confirm('Delete user {{ addslashes($user->name) }}?');">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="action-btn btn-delete" @disabled(Auth::id() === $user->id)>Delete</button>
-                                </form>
+                                @if($user->isSuperAdmin() && !Auth::user()->isSuperAdmin())
+                                    <span class="muted" style="font-weight:700;">Protected</span>
+                                @else
+                                    <button
+                                        type="button"
+                                        class="action-btn btn-edit"
+                                        onclick="openEditModal({{ $user->id }}, @js($user->name), @js($user->email), @js($user->role), @js($user->assignedProjects->pluck('id')->values()->all()))"
+                                    >
+                                        Edit
+                                    </button>
+                                    <form
+                                        action="{{ route('settings.users.destroy', $user) }}"
+                                        method="POST"
+                                        data-confirm
+                                        data-confirm-title="Delete user?"
+                                        data-confirm-message="Delete user {{ addslashes($user->name) }}? This will remove their access to the system."
+                                        data-confirm-button="Delete user"
+                                        data-confirm-variant="danger"
+                                    >
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="action-btn btn-delete" @disabled(Auth::id() === $user->id)>Delete</button>
+                                    </form>
+                                @endif
                             </div>
                         </td>
                     </tr>
@@ -385,6 +401,9 @@
                     <option value="employee" @selected(old('role') === 'employee')>Employee</option>
                     <option value="office_engineer" @selected(old('role') === 'office_engineer')>Office Engineer</option>
                     <option value="admin" @selected(old('role') === 'admin')>Admin</option>
+                    @if(Auth::user()->isSuperAdmin())
+                        <option value="super_admin" @selected(old('role') === 'super_admin')>Super Admin</option>
+                    @endif
                 </select>
             </div>
             <div class="form-group" id="addProjectAssignments">
@@ -438,6 +457,9 @@
                     <option value="employee">Employee</option>
                     <option value="office_engineer">Office Engineer</option>
                     <option value="admin">Admin</option>
+                    @if(Auth::user()->isSuperAdmin())
+                        <option value="super_admin">Super Admin</option>
+                    @endif
                 </select>
             </div>
             <div class="form-group" id="editProjectAssignments">

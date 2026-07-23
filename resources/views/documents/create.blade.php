@@ -1,6 +1,10 @@
 @extends('layouts.app')
 
 @section('content')
+    @php
+        $documentTypeOptions = \App\Models\Document::documentTypeOptions();
+        $categoryOptions = \App\Models\Document::categoryOptions();
+    @endphp
     <style>
         .form-container {
             max-width: 800px;
@@ -51,6 +55,13 @@
             text-decoration: none;
             margin-left: 12px;
         }
+
+        .helper-text {
+            display: block;
+            margin-top: 8px;
+            color: #6b7280;
+            font-size: 12px;
+        }
     </style>
 
     <div class="form-container">
@@ -73,33 +84,46 @@
 
             <div class="form-group">
                 <label>Title *</label>
-                <input type="text" name="title" required>
+                <input type="text" name="title" value="{{ old('title') }}" required>
             </div>
 
             <div class="form-group">
                 <label>Description</label>
-                <textarea name="description" rows="3"></textarea>
+                <textarea name="description" rows="3">{{ old('description') }}</textarea>
             </div>
 
             <div class="form-group">
                 <label>Document Type *</label>
-                <select name="document_type" required>
-                    <option value="contract">Contract</option>
-                    <option value="invoice">Invoice</option>
-                    <option value="report">Report</option>
-                    <option value="other">Other</option>
+                <select name="document_type" id="document_type" required>
+                    @foreach ($documentTypeOptions as $value => $label)
+                        <option value="{{ $value }}" @selected(old('document_type', 'contract') === $value)>{{ $label }}</option>
+                    @endforeach
+                    <option value="other" @selected(old('document_type') === 'other')>Other</option>
                 </select>
+            </div>
+
+            <div class="form-group" id="document_type_other_group" style="display:none;">
+                <label>Specify Document Type *</label>
+                <input type="text" name="document_type_other" id="document_type_other"
+                    value="{{ old('document_type_other') }}" placeholder="Enter document type">
             </div>
 
             <div class="form-group">
                 <label>Category</label>
-                <select name="category">
+                <select name="category" id="category">
                     <option value="">Select Category</option>
-                    <option value="financial">Financial</option>
-                    <option value="legal">Legal</option>
-                    <option value="technical">Technical</option>
-                    <option value="administrative">Administrative</option>
+                    @foreach ($categoryOptions as $value => $label)
+                        <option value="{{ $value }}" @selected(old('category') === $value)>{{ $label }}</option>
+                    @endforeach
+                    <option value="other" @selected(old('category') === 'other')>Other</option>
                 </select>
+            </div>
+
+            <div class="form-group" id="category_other_group" style="display:none;">
+                <label>Specify Category *</label>
+                <input type="text" name="category_other" id="category_other" value="{{ old('category_other') }}"
+                    placeholder="Enter category">
+                <small class="helper-text">Use this only when the category is not listed above.</small>
             </div>
 
             <div class="form-group">
@@ -116,12 +140,12 @@
 
             <div class="form-group">
                 <label>Document Date</label>
-                <input type="date" name="document_date">
+                <input type="date" name="document_date" value="{{ old('document_date') }}">
             </div>
 
             <div class="form-group">
                 <label>Expiry Date (If applicable)</label>
-                <input type="date" name="expiry_date">
+                <input type="date" name="expiry_date" value="{{ old('expiry_date') }}">
             </div>
 
             <div class="form-group">
@@ -142,4 +166,34 @@
             </div>
         </form>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const toggleOtherField = (selectId, wrapperId, inputId) => {
+                const select = document.getElementById(selectId);
+                const wrapper = document.getElementById(wrapperId);
+                const input = document.getElementById(inputId);
+
+                if (!select || !wrapper || !input) {
+                    return;
+                }
+
+                const sync = () => {
+                    const show = select.value === 'other';
+                    wrapper.style.display = show ? 'block' : 'none';
+                    input.required = show;
+
+                    if (!show) {
+                        input.value = '';
+                    }
+                };
+
+                select.addEventListener('change', sync);
+                sync();
+            };
+
+            toggleOtherField('document_type', 'document_type_other_group', 'document_type_other');
+            toggleOtherField('category', 'category_other_group', 'category_other');
+        });
+    </script>
 @endsection

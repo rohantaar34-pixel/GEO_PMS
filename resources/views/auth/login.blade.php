@@ -21,7 +21,7 @@
         }
 
         .login-card-head {
-            background: #BE0000;
+            background: var(--brand-primary);
             padding: 32px 36px 28px;
             text-align: center;
         }
@@ -36,7 +36,7 @@
         }
 
         .login-card-head p {
-            color: rgba(255, 255, 255, .65);
+            color: rgba(255, 255, 255, .72);
             font-size: .78rem;
             letter-spacing: .06em;
             text-transform: uppercase;
@@ -97,13 +97,13 @@
         }
 
         .f-group input:focus {
-            border-color: #BE0000;
+            border-color: var(--brand-primary);
             background: #fff;
-            box-shadow: 0 0 0 3px rgba(190, 0, 0, .1);
+            box-shadow: 0 0 0 3px rgba(var(--brand-primary-rgb), .14);
         }
 
         .f-group input.is-err {
-            border-color: #BE0000;
+            border-color: var(--brand-primary);
             background: #fff8f8;
         }
 
@@ -115,7 +115,7 @@
         }
 
         .remember-row input[type="checkbox"] {
-            accent-color: #BE0000;
+            accent-color: var(--brand-primary);
             width: 15px;
             height: 15px;
             cursor: pointer;
@@ -133,7 +133,7 @@
         .btn-signin {
             width: 100%;
             padding: 13px;
-            background: #BE0000;
+            background: var(--brand-primary);
             color: #fff;
             border: none;
             border-radius: 8px;
@@ -143,13 +143,13 @@
             text-transform: uppercase;
             cursor: pointer;
             font-family: 'Montserrat', sans-serif;
-            box-shadow: 0 4px 16px rgba(190, 0, 0, .28);
+            box-shadow: 0 4px 16px rgba(var(--brand-primary-rgb), .28);
             transition: background .15s, box-shadow .15s, transform .1s;
         }
 
         .btn-signin:hover {
-            background: #9a0000;
-            box-shadow: 0 6px 20px rgba(190, 0, 0, .38);
+            background: var(--brand-primary-dark);
+            box-shadow: 0 6px 20px rgba(var(--brand-primary-rgb), .38);
         }
 
         .btn-signin:active {
@@ -167,22 +167,20 @@
 
     <div class="login-wrap">
         <div class="login-card">
-
             <div class="login-card-head">
                 <h2>Sign In</h2>
-                <p>Restricted — authorised personnel only</p>
+                <p>{{ $systemSettings->resolved_name }}</p>
             </div>
 
             <div class="login-card-body">
-
                 @if ($errors->has('email') && str_contains($errors->first('email'), 'banned'))
                     <div class="alert-box alert-banned">
-                        <span>🚫</span>
+                        <span>Blocked</span>
                         <span>{{ $errors->first('email') }}</span>
                     </div>
                 @elseif ($errors->any())
                     <div class="alert-box alert-error">
-                        <span>⚠</span>
+                        <span>Alert</span>
                         <span>{{ $errors->first() }}</span>
                     </div>
                 @endif
@@ -199,7 +197,7 @@
 
                     <div class="f-group">
                         <label for="password">Password</label>
-                        <input type="password" id="password" name="password" placeholder="••••••••"
+                        <input type="password" id="password" name="password" placeholder="........"
                             autocomplete="current-password" class="{{ $errors->has('password') ? 'is-err' : '' }}">
                     </div>
 
@@ -212,9 +210,8 @@
                 </form>
 
                 <div class="login-footnote">
-                    🔒 No self-registration. Contact your administrator for access.
+                    No self-registration. Contact your administrator for access.
                 </div>
-
             </div>
         </div>
     </div>

@@ -192,6 +192,9 @@
     <div class="settings-tabs">
         <a href="{{ route('settings.projects.index') }}" class="settings-tab active">Projects</a>
         <a href="{{ route('settings.users.index') }}" class="settings-tab">Users</a>
+        @if(Auth::user()->isSuperAdmin())
+            <a href="{{ route('settings.branding.index') }}" class="settings-tab">Branding</a>
+        @endif
     </div>
 
     <div class="header-flex">
@@ -222,7 +225,15 @@
                             </span>
                         </td>
                         <td>
-                            <form action="{{ route('settings.projects.destroy', $project) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this project? This will also delete all associated documents and files in the Document Tracker!');">
+                            <form
+                                action="{{ route('settings.projects.destroy', $project) }}"
+                                method="POST"
+                                data-confirm
+                                data-confirm-title="Delete project?"
+                                data-confirm-message="Are you sure you want to delete this project? This will also delete all associated documents and files in the Document Tracker."
+                                data-confirm-button="Delete project"
+                                data-confirm-variant="danger"
+                            >
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="action-btn btn-delete">Delete</button>
